@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.utils import enums
 from config.celery.queue import CeleryQueue
-from . import tasks as background_tasks
+from core.v1.users import tasks as background_tasks
 
 
 class UserManager(BaseUserManager):
@@ -87,9 +87,9 @@ class User(AbstractBaseUser, enums.BaseModelMixin):
         assert self.email, f"User {self.id} does not have a valid email address"
         if not ignore_verification and not self.is_email_verified:
             return
-        background_tasks.send_email_to_address.apply_async(
+        background_tasks.send_email_to_user.apply_async(
             (self.id, subject, message),
-            queue=CeleryQueue.Definitions.EMAIL_AND_SMS_NOTIFICATION,
+            queue=CeleryQueue.Definitions.EMAIL_NOTIFICATION,
         )
 
     def verify_email(self):
