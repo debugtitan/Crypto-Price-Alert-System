@@ -1,0 +1,76 @@
+services:
+  redis:
+    image: redis
+
+  web:
+    build:
+      context: .
+      dockerfile: ./devops/Dockerfile
+    volumes:
+      - .:/alerto
+    ports:
+      - "8000:8000"
+    image: alerto:latest
+    container_name: alerto_backend
+    command: /start.sh
+    env_file:
+      - ./.env
+
+    depends_on:
+      - redis
+      - postgres
+
+  celeryworker:
+    build:
+      context: .
+      dockerfile: ./devops/Dockerfile
+    image: alerto:latest
+    container_name: celeryworker
+    depends_on:
+      - redis
+      - postgres
+    command: /start-celeryworker.sh
+    env_file:
+      - ./.env
+    restart: unless-stopped
+
+  celerybeat:
+    build:
+      context: .
+      dockerfile: ./devops/Dockerfile
+    image: alerto:latest
+    container_name: celerybeat
+    depends_on:
+      - celeryworker
+    command: /start-celerybeat.sh
+    env_file:
+      - ./.env
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    volumes:
+      - new_postgres:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_DB=alerto
+      - POSTGRES_USER=debug@titanlabs
+      - POSTGRES_PASSWORD=debug@titanlabs
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./devops/nginx/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+    restart: unless-stopped
+    volumes:
+      - ./devops/nginx/conf.d:/etc/nginx/conf.d
+      - ./static:/static
+
+volumes:
+  new_postgres:

@@ -7,12 +7,16 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from config.celery.queue import CeleryQueue
 from core.v1.users.models import UserSession, User
 from core.v1.users import serializers
-from core.utils.helpers import mixins, permissions, redis, security, message_templates
+from core.utils.helpers import permissions, redis, security, message_templates
+from core.utils.helpers.mixins import CustomRequestDataValidationMixin
 from core.utils.exceptions import CustomException
 from . import tasks as global_background_tasks
 
 
-class AuthViewSet(mixins.CustomRequestDataValidationMixin, viewsets.ViewSet):
+class AuthViewSet(
+    CustomRequestDataValidationMixin,
+    viewsets.ViewSet,
+):
     """Authentication viewsets for users"""
 
     queryset = User.objects
@@ -22,6 +26,7 @@ class AuthViewSet(mixins.CustomRequestDataValidationMixin, viewsets.ViewSet):
         return self.queryset.all()
 
     def get_required_fields(self):
+        print(self.action)
         if self.action == "initialize_email_login":
             return ["email"]
         elif self.action == "finalize_email_login":
@@ -30,10 +35,14 @@ class AuthViewSet(mixins.CustomRequestDataValidationMixin, viewsets.ViewSet):
         return []
 
     def get_permissions(self):
+        print(self.action)
         if self.action in [
             "initialize_email_login",
             "finalize_email_login",
         ]:
+            return [permissions.IsGuestUser()]
+
+        elif self.action == "helper":
             return [permissions.IsGuestUser()]
 
         return super().get_permissions()
@@ -47,6 +56,7 @@ class AuthViewSet(mixins.CustomRequestDataValidationMixin, viewsets.ViewSet):
 
     @decorators.action(detail=False, methods=["post"])
     def initialize_email_login(self, request, *args, **kwargs):
+        print("hi")
         email = request.data.get("email").strip()
         django_core_validators.validate_email(email)
 

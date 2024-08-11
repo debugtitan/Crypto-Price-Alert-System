@@ -51,7 +51,6 @@ class User(AbstractBaseUser, enums.BaseModelMixin):
     """default user models for crypto token price tracker"""
 
     email = models.EmailField(_("email address"), unique=True)
-
     is_active = models.BooleanField(
         _("active"),
         default=True,
@@ -69,9 +68,10 @@ class User(AbstractBaseUser, enums.BaseModelMixin):
 
     account_type = models.CharField(
         _("user roles"),
-        choices=enums.AccountType.values(),
+        choices=enums.AccountType.choices(),
         default=enums.AccountType.CLIENT.value,
         help_text=_("user account roles and some fdeatures they can handle"),
+        max_length=25,
     )
 
     objects = UserManager()
