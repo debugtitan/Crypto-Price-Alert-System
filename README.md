@@ -2,7 +2,6 @@
 
 - [The Project](#about-the-project)
 - [Features](#features)
-- [Demo Video](#demo_video)
 - [Built With](#built-with)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
