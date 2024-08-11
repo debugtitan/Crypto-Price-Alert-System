@@ -5,7 +5,7 @@ from core.utils.helpers.email_client import EmailClient
 
 
 @shared_task
-def send_email_to_address(user_id: int, subject, message):
+def send_email_to_user(user_id: int, subject, message):
     UserModel = get_user_model()
     instance = UserModel.objects.get(id=user_id)
     email_messaging_helper = EmailClient(

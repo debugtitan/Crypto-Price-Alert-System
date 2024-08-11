@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "django_celery_beat",
 ]
 
 PROJECT_APPS = ["core.v1.users.apps.UsersConfig", "core.utils.apps.UtilsConfig"]
@@ -217,11 +218,11 @@ API_VERSION = env.str("API_VERSION", default="1")
 
 
 EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECS = env.int(
-    "DJANGO_EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECS", default=(3600 * 6)
+    "DJANGO_EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECS", default=(60 * 10)
 )
 
 EMAIL_LOGIN_TOKEN_EXPIRATION_SECS = env.int(
-    "DJANGO_EMAIL_LOGIN_TOKEN_EXPIRATION_SECS", default=(3600 * 6)
+    "DJANGO_EMAIL_LOGIN_TOKEN_EXPIRATION_SECS", default=(60 * 10)
 )
 
 DJANGO_EMAIL_LOGIN_MASTER_TOKEN = env.str(

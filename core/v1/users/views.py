@@ -10,7 +10,7 @@ from core.v1.users import serializers
 from core.utils.helpers import permissions, redis, security, message_templates
 from core.utils.helpers.mixins import CustomRequestDataValidationMixin
 from core.utils.exceptions import CustomException
-from . import tasks as global_background_tasks
+from core.utils import tasks as global_background_tasks
 
 
 class AuthViewSet(
@@ -26,7 +26,6 @@ class AuthViewSet(
         return self.queryset.all()
 
     def get_required_fields(self):
-        print(self.action)
         if self.action == "initialize_email_login":
             return ["email"]
         elif self.action == "finalize_email_login":
@@ -35,7 +34,6 @@ class AuthViewSet(
         return []
 
     def get_permissions(self):
-        print(self.action)
         if self.action in [
             "initialize_email_login",
             "finalize_email_login",
@@ -56,7 +54,6 @@ class AuthViewSet(
 
     @decorators.action(detail=False, methods=["post"])
     def initialize_email_login(self, request, *args, **kwargs):
-        print("hi")
         email = request.data.get("email").strip()
         django_core_validators.validate_email(email)
 
@@ -67,6 +64,7 @@ class AuthViewSet(
         )
         cache_instance.cache_value = {"email": email}
         message = message_templates.MessageTemplates.email_login_email(token)
+        print(message)
         try:
             instance = User.objects.get(email=email)
             instance.send_mail("Login To Your Account", message)

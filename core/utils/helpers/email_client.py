@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.utils.safestring import mark_safe
 
 
 class EmailClient:
@@ -15,14 +16,16 @@ class EmailClient:
         self.receiver_email = receiver_email
         self.receiver_name = receiver_name or ""
         self.subject = subject
-        self.message = message
+        self.message = mark_safe(message)
 
     def send_mail(self):
+
         context = {
             "subject": self.subject,
             "name": self.receiver_name,
             "message": self.message,
         }
+
         mail_body = render_to_string(self.mail_template, context)
         send_mail(
             self.subject,
