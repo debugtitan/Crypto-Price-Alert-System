@@ -42,7 +42,11 @@ INSTALLED_APPS = [
     "django_celery_beat",
 ]
 
-PROJECT_APPS = ["core.v1.users.apps.UsersConfig", "core.utils.apps.UtilsConfig"]
+PROJECT_APPS = [
+    "core.v1.users.apps.UsersConfig",
+    "core.utils.apps.UtilsConfig",
+    "core.v1.apps.coins.CoinsConfig",
+]
 
 INSTALLED_APPS += PROJECT_APPS
 
