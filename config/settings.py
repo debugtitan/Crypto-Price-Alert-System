@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "django_celery_beat",
+    "drf_yasg",
 ]
 
 PROJECT_APPS = [
@@ -285,3 +286,10 @@ EMAIL_PORT = env.int("EMAIL_PORT", 465)
 EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", default="***")
 EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", default="***")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
+    }
+}
