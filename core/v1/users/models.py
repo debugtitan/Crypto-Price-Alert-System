@@ -2,8 +2,10 @@ from django.db import models
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from core.utils import enums
+from config.celery.queue import CeleryQueue
+from . import tasks as background_tasks
 
 
 class UserManager(BaseUserManager):
@@ -59,10 +61,10 @@ class User(AbstractBaseUser, enums.BaseModelMixin):
         ),
     )
 
-    is_verified = models.BooleanField(
+    is_email_verified = models.BooleanField(
         _("verified"),
         default=False,
-        help_text=_("whether this user should be treated as verified."),
+        help_text=_("whether this user email should be treated as verified."),
     )
 
     account_type = models.CharField(
@@ -80,6 +82,26 @@ class User(AbstractBaseUser, enums.BaseModelMixin):
     @staticmethod
     def get_email_signup_code_cache_reference(code):
         return f"EMAIL_SIGNUP_CODE_{code}"
+
+    def send_mail(self, subject, message, ignore_verification=True):
+        assert self.email, f"User {self.id} does not have a valid email address"
+        if not ignore_verification and not self.is_email_verified:
+            return
+        background_tasks.send_email_to_address.apply_async(
+            (self.id, subject, message),
+            queue=CeleryQueue.Definitions.EMAIL_AND_SMS_NOTIFICATION,
+        )
+
+    def verify_email(self):
+        self.is_email_verified = True
+        self.save()
+
+    def retrieve_auth_token(self):
+        data = {}
+        refresh = RefreshToken.for_user(self)
+        data["refresh"] = str(refresh)
+        data["access"] = str(refresh.access_token)
+        return data
 
     class Meta:
         verbose_name = _("user")

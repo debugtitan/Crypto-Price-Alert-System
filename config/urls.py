@@ -1,9 +1,10 @@
 """
 URL configuration for crypto_alert_system project.
 """
-from django.contrib import admin
-from django.urls import path
+
+from django.conf import settings
+from django.urls import path, include
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path(f"api/v{settings.API_VERSION}/auth/", include("core.users.urls")),
 ]

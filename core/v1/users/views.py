@@ -7,9 +7,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from config.celery.queue import CeleryQueue
 from core.v1.users.models import UserSession, User
 from core.v1.users import serializers
-from core.utils.helpers import mixins, permissions, redis,security
+from core.utils.helpers import mixins, permissions, redis, security, message_templates
 from core.utils.exceptions import CustomException
 from . import tasks as global_background_tasks
+
 
 class AuthViewSet(mixins.CustomRequestDataValidationMixin, viewsets.ViewSet):
     """Authentication viewsets for users"""
@@ -55,7 +56,7 @@ class AuthViewSet(mixins.CustomRequestDataValidationMixin, viewsets.ViewSet):
             ttl=settings.EMAIL_LOGIN_TOKEN_EXPIRATION_SECS,
         )
         cache_instance.cache_value = {"email": email}
-        message = MessageTemplates.email_login_email(token)
+        message = message_templates.MessageTemplates.email_login_email(token)
         try:
             instance = User.objects.get(email=email)
             instance.send_mail("Login To Your Account", message)
@@ -94,7 +95,7 @@ class AuthViewSet(mixins.CustomRequestDataValidationMixin, viewsets.ViewSet):
             instance = User.objects.get(email=email.lower())
         except User.DoesNotExist:
             instance = User.objects.create(email=email.lower())
-            serializer = serializers.UserSerializer.Update(
+            serializer = serializers.UserSerializer(
                 instance=instance, data=request.data, partial=True
             )
             serializer.is_valid(raise_exception=True)
@@ -124,7 +125,7 @@ class AuthViewSet(mixins.CustomRequestDataValidationMixin, viewsets.ViewSet):
                 is_active=True,
             )
 
-        serializer = serializers.UserSerializer.Retrieve(instance=instance)
+        serializer = serializers.UserSerializer(instance=instance)
         response_data = {**serializer.data, "token": auth_token}
         return response.Response(
             status=status.HTTP_200_OK,
