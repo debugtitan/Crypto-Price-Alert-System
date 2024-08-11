@@ -7,4 +7,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path(f"api/v{settings.API_VERSION}/auth/", include("core.v1.users.urls")),
+    path(f"api/v{settings.API_VERSION}/", include("core.v1.alerts.urls")),
 ]

@@ -13,6 +13,27 @@ class MessageTemplates:
         return message
 
     @staticmethod
+    def alert_coin_price_trigger_success(target_price, current_price, direction):
+        arrow_emoji = "⬆️" if direction == "HIGH" else "⬇️"
+        message = f"""
+            <div style="font-family: Arial, sans-serif; color: #333; background-color: #f4f4f4; padding: 20px; border-radius: 10px;">
+                <h2 style="color: #2c3e50;">🚨 Price Alert Triggered! {arrow_emoji}</h2>
+                <p style="color: #34495e; font-size: 16px;">
+                    Your price alert for the coin has been triggered.
+                </p>
+                <p style="color: #2c3e50; font-size: 18px;">
+                    Target Price: <strong>${target_price}</strong><br>
+                    Current Price: <strong>${current_price}</strong><br>
+                    Direction: <strong>{direction.capitalize()}</strong>
+                </p>
+                <p style="color: #34495e; font-size: 16px;">
+                    Please check your portfolio for more details.
+                </p>
+            </div>
+        """
+        return message
+
+    @staticmethod
     def email_login_email(token: str):
 
         message = f"""

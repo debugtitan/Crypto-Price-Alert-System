@@ -64,7 +64,6 @@ class AuthViewSet(
         )
         cache_instance.cache_value = {"email": email}
         message = message_templates.MessageTemplates.email_login_email(token)
-        print(message)
         try:
             instance = User.objects.get(email=email)
             instance.send_mail("Login To Your Account", message)

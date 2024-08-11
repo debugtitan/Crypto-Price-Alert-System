@@ -5,7 +5,7 @@ Django settings for crypto_alert_system project.
 
 import os
 from pathlib import Path
-
+from celery.schedules import crontab
 from django.utils.timezone import timedelta
 from corsheaders.defaults import default_headers as cors_default_headers
 from config.celery.queue import CeleryQueue
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
 PROJECT_APPS = [
     "core.v1.users.apps.UsersConfig",
     "core.utils.apps.UtilsConfig",
-    "core.v1.apps.coins.CoinsConfig",
+    "core.v1.alerts.apps.AlertsConfig",
 ]
 
 INSTALLED_APPS += PROJECT_APPS
@@ -260,6 +260,20 @@ CELERY_ACKS_LATE = True
 CELERY_TASK_REJECT_ON_WORKER_LOST = True
 CELERYD_PREFETCH_MULTIPLIER = 1
 CELERY_QUEUES = CeleryQueue.queues()
+
+
+CELERY_BEAT_SCHEDULE = {
+    "clear_out_expired_periodic_tasks": {
+        "task": "core.utils.tasks.clear_out_periodic_tasks",
+        "schedule": crontab(hour="*/2"),
+        "options": {"queue": "beats"},
+    },
+    "price_trigger_checker": {
+        "task": "core.utils.tasks.price_fetcher",
+        "schedule": timedelta(seconds=8),
+        "options": {"queue": "beats"},
+    },
+}
 
 
 # ___________EMAIL______________________
