@@ -9,4 +9,4 @@ python manage.py collectstatic --noinput
 python manage.py makemigrations
 python manage.py migrate
 
-gunicorn config.wsgi:application --workers 3 --worker-class gevent --bind 0.0.0.0:8000 --timeout 0 --log-level info --access-logfile -
+gunicorn config.wsgi:application --workers 3  --bind 0.0.0.0:8000 --timeout 0 --log-level info --access-logfile -

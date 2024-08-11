@@ -39,7 +39,7 @@ services:
       context: .
       dockerfile: ./devops/Dockerfile
     image: alerto:latest
-    container_name: celerybeat
+    container_name: celery_beat
     depends_on:
       - celeryworker
     command: /start-celerybeat.sh
