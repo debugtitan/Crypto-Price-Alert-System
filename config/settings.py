@@ -34,6 +34,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 ]
 
+PROJECT_APPS = ["core.v1.users.apps.UsersConfig"]
+
+INSTALLED_APPS += PROJECT_APPS
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -166,3 +170,17 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
     "EXCEPTION_HANDLER": "utils.exceptions.exceptions.custom_exception_handler",
 }
+
+#   User Model
+AUTH_USER_MODEL = "users.User"
+
+# Auth Backend
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# Session Engine
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
+# ___________ API AND VERSIONING ____________
+API_VERSION = env.str("API_VERSION", default="1")
