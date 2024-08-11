@@ -4,6 +4,7 @@ from kombu import Queue
 class CeleryQueue:
     class Definitions:
         BEATS = "beats"
+        EMAIL_NOTIFICATION = "email-notification"
 
     @staticmethod
     def queues():

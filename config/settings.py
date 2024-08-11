@@ -184,3 +184,15 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 # ___________ API AND VERSIONING ____________
 API_VERSION = env.str("API_VERSION", default="1")
+
+
+EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECS = env.int(
+    "DJANGO_EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECS", default=(3600 * 6)
+)
+
+EMAIL_LOGIN_TOKEN_EXPIRATION_SECS = env.int(
+    "DJANGO_EMAIL_LOGIN_TOKEN_EXPIRATION_SECS", default=(3600 * 6)
+)
+# Cache
+
+CACHE_TTL = env.int("DJANGO_VIEW_CACHE_TTL_SECS", 60 * 15)

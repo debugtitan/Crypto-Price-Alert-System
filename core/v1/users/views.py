@@ -1,15 +1,15 @@
 import re
-from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core import validators as django_core_validators
 from django.db import transaction
 from rest_framework import viewsets, status, response, decorators
 from rest_framework_simplejwt.tokens import RefreshToken
+from config.celery.queue import CeleryQueue
 from core.v1.users.models import UserSession, User
 from core.v1.users import serializers
-from utils.helpers import mixins, permissions, redis,security
-from utils.exceptions import CustomException
-
+from core.utils.helpers import mixins, permissions, redis,security
+from core.utils.exceptions import CustomException
+from . import tasks as global_background_tasks
 
 class AuthViewSet(mixins.CustomRequestDataValidationMixin, viewsets.ViewSet):
     """Authentication viewsets for users"""
@@ -62,7 +62,7 @@ class AuthViewSet(mixins.CustomRequestDataValidationMixin, viewsets.ViewSet):
         except User.DoesNotExist:
             global_background_tasks.send_email_to_address.apply_async(
                 (email, "Login To Your Account", message),
-                queue=CeleryQueue.Definitions.EMAIL_AND_SMS_NOTIFICATION,
+                queue=CeleryQueue.Definitions.EMAIL_NOTIFICATION,
             )
         return response.Response(
             status=status.HTTP_200_OK,
