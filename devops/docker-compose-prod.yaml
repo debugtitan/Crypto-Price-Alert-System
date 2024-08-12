@@ -65,11 +65,22 @@ services:
       dockerfile: ./devops/nginx/Dockerfile
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - web
     restart: unless-stopped
     volumes:
-      - ./devops/nginx/dev/conf.d:/etc/nginx/conf.d
+      - ./devops/nginx/conf.d:/etc/nginx/conf.d
       - ./static:/static
+      - /etc/letsencrypt:/etc/letsencrypt
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - /var/certbot/conf:/etc/letsencrypt/:rw
+      - /var/certbot/www/:/var/www/certbot/:rw
+    depends_on:
+      - nginx
+
 volumes:
   new_postgres:
