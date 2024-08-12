@@ -12,6 +12,9 @@ from core.utils.helpers.mixins import CustomRequestDataValidationMixin
 from core.utils.exceptions import CustomException
 from core.utils import tasks as global_background_tasks
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 
 class AuthViewSet(
     CustomRequestDataValidationMixin,
@@ -21,6 +24,25 @@ class AuthViewSet(
 
     queryset = User.objects
     serializer_class = serializers.UserSerializer
+    email_param = openapi.Parameter(
+        "email",
+        openapi.IN_QUERY,
+        description="email address of the user",
+        type=openapi.TYPE_STRING,
+        required=True,
+    )
+
+    token_param = openapi.Parameter(
+        name="token",
+        in_=openapi.IN_QUERY,
+        description="The token received from the email.",
+        type=openapi.TYPE_STRING,
+        required=True,
+    )
+
+    error_response = openapi.Response(
+        description="Invalid token or email",
+    )
 
     def get_queryset(self):
         return self.queryset.all()
@@ -52,8 +74,17 @@ class AuthViewSet(
         if match_pattern:
             return match_pattern.group(1)
 
+    @swagger_auto_schema(
+        methods=["post"],
+        responses={200: "A login code has been sent to the provided email address."},
+        manual_parameters=[email_param],
+    )
     @decorators.action(detail=False, methods=["post"])
     def initialize_email_login(self, request, *args, **kwargs):
+        """
+        initializes the email login process by generating an OTP
+        token, caching the email and token, and sending an email with the login code to the user.
+        """
         email = request.data.get("email").strip()
         django_core_validators.validate_email(email)
 
@@ -77,9 +108,19 @@ class AuthViewSet(
             data={"message": f"A login code has been sent to {email}"},
         )
 
+    @swagger_auto_schema(
+        methods=["post"],
+        responses={200: serializer_class, 404: error_response},
+        manual_parameters=[email_param, token_param],
+    )
     @decorators.action(detail=False, methods=["post"])
     @transaction.atomic
     def finalize_email_login(self, request, *args, **kwargs):
+        """
+        handles the final steps of email login authentication,
+        including token validation, user creation or retrieval, cache management, session handling, and
+        response generation.
+        """
         token = request.data.get("token")
         email = request.data.get("email")
         cache_instance = redis.RedisTools(
